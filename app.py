@@ -162,6 +162,27 @@ def extract_tax(text):
                 continue
 
             return value
+        # Handle CGST + SGST split taxes
+
+    cgst = re.search(
+        r"CGST.*?([\d,]+\.?\d*)",
+        text,
+        re.IGNORECASE
+    )
+
+    sgst = re.search(
+        r"SGST.*?([\d,]+\.?\d*)",
+        text,
+        re.IGNORECASE
+    )
+
+
+    if cgst and sgst:
+        return (
+            normalize_amount(cgst.group(1))
+            +
+            normalize_amount(sgst.group(1))
+        )
 
 
     return None
