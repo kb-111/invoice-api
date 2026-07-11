@@ -459,56 +459,76 @@ def extract_amount(text):
 # Tax
 # ---------------------------
 
-def extract_amount(text):
+def extract_tax(text):
+
 
     patterns = [
 
-        # Subtotal: 2200
-        r"Subtotal\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+        # GST Amount: 440
+        r"(?:GST|Tax|VAT|IGST|CGST|SGST)\s*Amount\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Sub Total: 2200
-        r"Sub\s*Total\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Taxable Amount: 2200
-        r"Taxable\s+Amount\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+        # GST @ 18% : 440
+        r"(?:GST|Tax|VAT|IGST|CGST|SGST)\s*@\s*\d+\s*%\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Taxable Value: 2200
-        r"Taxable\s+Value\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Net Amount: 2200
-        r"Net\s+Amount\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+        # GST (18%): 440
+        r"(?:GST|Tax|VAT|IGST|CGST|SGST)\s*\(\s*\d+\s*%\s*\)\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Base Amount: 2200
-        r"Base\s+Amount\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Amount Before Tax: 2200
-        r"Amount\s+Before\s+Tax\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+        # GST: 440
+        r"(?:GST|Tax|VAT|IGST|CGST|SGST)\s*[:=\-]\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Total Before Tax: 2200
-        r"Total\s+Before\s+Tax\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Amount: 2200
-        r"\bAmount\s*[:=\-]\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)"
+        # Total Tax
+        r"Total\s+Tax\s*[:=\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)"
 
     ]
 
 
-    for pattern in patterns:
+    for p in patterns:
 
-        match = re.search(
-            pattern,
+        m = re.search(
+            p,
             text,
             re.IGNORECASE
         )
 
-        if match:
+
+        if m:
 
             return normalize_amount(
-                match.group(1)
+                m.group(1)
             )
 
 
+
+    # CGST + SGST case
+
+    cgst = re.search(
+        r"CGST.*?([\d,]+\.?\d*)",
+        text,
+        re.IGNORECASE
+    )
+
+    sgst = re.search(
+        r"SGST.*?([\d,]+\.?\d*)",
+        text,
+        re.IGNORECASE
+    )
+
+
+    if cgst and sgst:
+
+        cgst_amount = normalize_amount(cgst.group(1))
+        sgst_amount = normalize_amount(sgst.group(1))
+
+        if cgst_amount is not None and sgst_amount is not None:
+            return cgst_amount + sgst_amount
+
+
     return None
+
 
 
 # ---------------------------
