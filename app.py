@@ -128,15 +128,22 @@ def extract_tax(text):
 
     patterns = [
 
-        # IGST (18%): Rs. 25,200.00
-        r"(?:IGST|CGST|SGST|GST|VAT|Tax)\s*\(?\d*%?\)?\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.\d+)",
+        # GST Amount: 440
+        r"(?:GST|Tax|VAT|IGST|CGST|SGST)\s*(?:Amount)?\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Tax Amount: 500.00
-        r"Tax\s*Amount[:\s]*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.\d+)"
+        # Tax Amount: 440
+        r"Tax\s*Amount\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+
+        # GST (18%): 440
+        r"(?:GST|IGST|CGST|SGST|VAT)\s*\(\d+%\)\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+
+        # Tax @18% 440
+        r"Tax\s*@\s*\d+%\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)"
     ]
 
 
     for p in patterns:
+
         match = re.search(
             p,
             text,
