@@ -128,30 +128,40 @@ def extract_tax(text):
 
     patterns = [
 
+        # GST (18%): Rs. 25,200.00
+        r"(?:IGST|CGST|SGST|GST|VAT|Tax)\s*\(\s*\d+%\s*\)\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+
         # GST Amount: 440
-        r"(?:GST|Tax|VAT|IGST|CGST|SGST)\s*(?:Amount)?\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+        r"(?:GST|Tax|VAT|IGST|CGST|SGST)\s+Amount\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
         # Tax Amount: 440
-        r"Tax\s*Amount\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+        r"Tax\s+Amount\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # GST (18%): 440
-        r"(?:GST|IGST|CGST|SGST|VAT)\s*\(\d+%\)\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+        # Tax: 440
+        r"Tax\s*[:\-]\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
 
-        # Tax @18% 440
-        r"Tax\s*@\s*\d+%\s*[:\-]?\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)"
+        # VAT: 440
+        r"VAT\s*[:\-]\s*(?:Rs\.?|INR|USD|\$)?\s*([\d,]+\.?\d*)",
+
     ]
 
 
-    for p in patterns:
+    for pattern in patterns:
 
         match = re.search(
-            p,
+            pattern,
             text,
             re.IGNORECASE
         )
 
         if match:
-            return normalize_amount(match.group(1))
+            value = normalize_amount(match.group(1))
+
+            # Ignore percentages accidentally captured
+            if value is not None and value < 100:
+                continue
+
+            return value
 
 
     return None
